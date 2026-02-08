@@ -1,10 +1,8 @@
-from typing import Any
-
 import pandas as pd
 from pandas import DataFrame
 
 
-def read_excel_file(file_path_excel: str = "") -> list[Any] | DataFrame | list[str]:
+def read_excel_file(file_path_excel: str = "") -> list | DataFrame | list[str]:
     """Функция, которая преобразует excel-файл в python базу данных"""
     if not isinstance(file_path_excel, str):
         return []
@@ -16,7 +14,7 @@ def read_excel_file(file_path_excel: str = "") -> list[Any] | DataFrame | list[s
         else:
             return []
     except (FileNotFoundError, PermissionError, SyntaxError, TypeError, OSError):
-        return ['B']
+        return []
 
 
 print(read_excel_file("../data/operations.xlsx"))
