@@ -1,15 +1,14 @@
-[project]
+[tool.poetry]
 name = "pythonproject2"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Andrei Tiurin",email = "tyrandr@list.ru"}
-]
-requires-python = ">=3.13"
-dependencies = [
-    "openpyxl (>=3.1.5,<4.0.0)",
-    "pandas (>=3.0.0,<4.0.0)"
-]
+authors = ["Andrei Tiurin"]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pandas = "^3.0.0"
+openpyxl = "^3.1.5"
 
 [dependency-groups]
 dev = [
@@ -24,9 +23,8 @@ lint = [
     "isort (>=7.0.0,<8.0.0)"
 ]
 
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.black]

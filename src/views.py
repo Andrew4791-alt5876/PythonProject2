@@ -19,4 +19,4 @@ def read_excel_file(file_path_excel: str = "") -> list[Any] | DataFrame | list[s
         return ['B']
 
 
-print(read_excel_file("C:/Users/User/PycharmProjects/PythonProject2/data/operations.xlsx"))
+print(read_excel_file("../data/operations.xlsx"))
