@@ -7,12 +7,15 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "openpyxl (>=3.1.5,<4.0.0)",
+    "pandas (>=3.0.0,<4.0.0)"
 ]
 
 [dependency-groups]
 dev = [
     "requests (>=2.32.5,<3.0.0)",
-    "pytest (>=9.0.2,<10.0.0)"
+    "pytest (>=9.0.2,<10.0.0)",
+    "openpyxl (>=3.1.5,<4.0.0)"
 ]
 lint = [
     "flake8 (>=7.3.0,<8.0.0)",
@@ -25,3 +28,15 @@ lint = [
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 119
+exclude = ".git"
+
+[tool.isort]
+line_length = 119
+
+[tool.mypy]
+disallow_untyped_defs=true
+warn_return_any=true
+exclude = ".venv"
