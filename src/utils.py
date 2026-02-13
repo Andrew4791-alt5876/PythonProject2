@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from asyncio import timeout
 from datetime import datetime
 from typing import Union, Dict
 
@@ -87,6 +88,24 @@ def price_of_stocks(stocks):
     td = TDClient(apikey=API_KEY)
     price = td.price(symbol=stocks).as_json()
     return price
+
+
+def read_json_file(path: str = "") -> list[dict]:
+    """Функция, которая считывает и преобразует JSON-файл в Python-список"""
+    if not isinstance(path, str):
+        return []
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            try:
+                data_operations = json.load(file)
+                if isinstance(data_operations, list):
+                    return data_operations
+                else:
+                    return []
+            except json.JSONDecodeError:
+                return []
+    except (FileNotFoundError, PermissionError, SyntaxError, TypeError, OSError):
+        return []
 
 
 # print(price_of_stocks(["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]))

@@ -1,28 +1,47 @@
 from typing import Any
 
-from src.utils import read_excel_file, hello_by_current_time, sort_operations_by_date, convert_amount_of_transactions
+from src.utils import read_excel_file, hello_by_current_time, sort_operations_by_date, convert_amount_of_transactions, \
+  read_json_file, price_of_stocks
 
 
 def main_web_site() -> Any:
     hello_message = hello_by_current_time()
     df_excel = read_excel_file("../data/operations.xlsx")
     sorted_df_by_date = sort_operations_by_date(df_excel)
-    curse_usd_rub = convert_amount_of_transactions(1, 'USD')
-    curse_eur_rub = convert_amount_of_transactions(1, 'EUR')
+    list_nunber_card = list(set(list(sorted_df_by_date['Номер карты'])))
+    list_of_cards = []
+    for card in list_nunber_card:
+        if isinstance(card, str):
+            dict_sum_prices = {}
+            dict_sum_prices["last_digits"] = card[-4:]
+            sort_by_card = sorted_df_by_date[(sorted_df_by_date['Номер карты'] == card)]
+            sum_of_prices = sum(sort_by_card['Сумма платежа'])
+            dict_sum_prices["total_spent"] = sum_of_prices
+            dict_sum_prices["cashback"] = round(sum_of_prices / 100, 2)
+            list_of_cards.append(dict_sum_prices)
+        elif isinstance(card, float):
+            dict_sum_prices = {}
+            dict_sum_prices["last_digits"] = card
+            sort_by_card = sorted_df_by_date[(sorted_df_by_date['Номер карты']).isna()]
+            sum_of_prices = sum(sort_by_card['Сумма платежа'])
+            dict_sum_prices["total_spent"] = sum_of_prices
+            dict_sum_prices["cashback"] = round(sum_of_prices / 100, 2)
+            list_of_cards.append(dict_sum_prices)
+    # user_setting_file = read_json_file('C:/Users/User/PycharmProjects/PythonProject2/user_settings.json')
+    # list_course_currensies =[]
+    # for currrency in user_setting_file[0]['user_currencies']:
+    #     currrency_dict = {}
+    #     currrency_dict["currency"] = currrency
+    #     curse_to_rub = convert_amount_of_transactions(1, currrency)
+    #     currrency_dict["rate"] = curse_to_rub
+    #     list_course_currensies.append(currrency_dict)
+    # dict_course_stocks = (price_of_stocks(user_setting_file[0]["user_stocks"]))
+    # list_course_stocks = list(dict_course_stocks.items())
+    list_course_currensies = []
+    list_course_stocks = []
     message_to_frontend = {
   "greeting": hello_message,
-  "cards": [
-    {
-      "last_digits": "5814",
-      "total_spent": 1262.00,
-      "cashback": 12.62
-    },
-    {
-      "last_digits": "7512",
-      "total_spent": 7.94,
-      "cashback": 0.08
-    }
-  ],
+  "cards": list_of_cards,
   "top_transactions": [
     {
       "date": "21.12.2021",
@@ -55,40 +74,10 @@ def main_web_site() -> Any:
       "description": "Кешбэк за обычные покупки"
     }
   ],
-  "currency_rates": [
-    {
-      "currency": "USD",
-      "rate": curse_usd_rub
-    },
-    {
-      "currency": "EUR",
-      "rate": curse_eur_rub
-    }
-  ],
-  "stock_prices": [
-    {
-      "stock": "AAPL",
-      "price": 150.12
-    },
-    {
-      "stock": "AMZN",
-      "price": 3173.18
-    },
-    {
-      "stock": "GOOGL",
-      "price": 2742.39
-    },
-    {
-      "stock": "MSFT",
-      "price": 296.71
-    },
-    {
-      "stock": "TSLA",
-      "price": 1007.08
-    }
-  ]
+  "currency_rates": list_course_currensies,
+  "stock_prices": list_course_stocks
 }
-    return sorted_df_by_date['Номер карты']
+    return message_to_frontend
 
 
 print(main_web_site())
