@@ -2,13 +2,14 @@ import json
 import os
 import random
 from datetime import datetime
-from typing import Union, Dict, Any
+from typing import Any, Dict, Union
 
 import pandas as pd
 import requests
-from pandas import DataFrame
 from dotenv import load_dotenv
+from pandas import DataFrame
 from twelvedata import TDClient
+
 
 def read_excel_file(file_path_excel: str = "") -> list | DataFrame | list[str]:
     """Функция, которая преобразует excel-файл в python базу данных"""
@@ -29,32 +30,28 @@ def hello_by_current_time() -> str:
     """Функция, которая формирует приветственное сообщение в зависимости от фактического времени суток."""
     now_hour = datetime.now().hour
     if 6 <= now_hour < 12:
-        hello_message = 'Доброе утро!'
+        hello_message = "Доброе утро!"
     elif 12 <= now_hour < 18:
-        hello_message = 'Добрый день!'
+        hello_message = "Добрый день!"
     elif 18 <= now_hour <= 23:
-        hello_message = 'Добрый вечер!'
+        hello_message = "Добрый вечер!"
     else:
-        hello_message = 'Доброй ночи!'
+        hello_message = "Доброй ночи!"
     return hello_message
 
 
 def sort_operations_by_date(data_frame: Any) -> Any:
     """Функция, которая выполняет выборку с 1-го по текущую дату текущего месяца,
     год выбирается случайно в рамках базы данных."""
-    data_frame['Дата операции'] = pd.to_datetime(
-        data_frame['Дата операции'],
-        format='%d.%m.%Y %H:%M:%S',
-        errors='coerce'
+    data_frame["Дата операции"] = pd.to_datetime(
+        data_frame["Дата операции"], format="%d.%m.%Y %H:%M:%S", errors="coerce"
     )
     now_day = datetime.now().day
     now_month = datetime.now().month
-    sort_df_by_dates = data_frame[(data_frame['Дата операции'].dt.day <= now_day)]
-    sort_df_by_month = sort_df_by_dates[(sort_df_by_dates['Дата операции'].dt.month == now_month)]
+    sort_df_by_dates = data_frame[(data_frame["Дата операции"].dt.day <= now_day)]
+    sort_df_by_month = sort_df_by_dates[(sort_df_by_dates["Дата операции"].dt.month == now_month)]
     randon_year = random.randint(2018, 2021)
-    # print(randon_year)
-    # randon_year = 2021
-    sort_df_by_year = sort_df_by_month[(sort_df_by_month['Дата операции'].dt.year == randon_year)]
+    sort_df_by_year = sort_df_by_month[(sort_df_by_month["Дата операции"].dt.year == randon_year)]
     return sort_df_by_year
 
 
@@ -88,7 +85,7 @@ def convert_amount_of_transactions(amount: float, currency: str) -> Union[float,
 def price_of_stocks(stocks: Any) -> Any:
     """Функция для получения стоимости акций."""
     load_dotenv()
-    API_KEY: str = os.getenv("API_KEY_STOCKS")
+    API_KEY: str | None = os.getenv("API_KEY_STOCKS")
     td = TDClient(apikey=API_KEY)
     price = td.price(symbol=stocks).as_json()
     return price
@@ -110,13 +107,3 @@ def read_json_file(path: str = "") -> list[dict]:
                 return []
     except (FileNotFoundError, PermissionError, SyntaxError, TypeError, OSError):
         return []
-
-
-# answer_stocks = [
-#     ('AAPL', {'price': '255.82001'}),
-#     ('AMZN', {'price': '198.77000'}),
-#     ('GOOGL', {'price': '305.72000'}),
-#     ('MSFT', {'price': '401.16000'}),
-#     ('TSLA', {'price': '417.42001'})
-# ]
-# print(answer_stocks[0][0])
