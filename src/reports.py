@@ -35,6 +35,7 @@ def log_reports(filename: Any | None = None) -> Any:
                                 force_ascii=False
                             )
                         ), f, indent=2, ensure_ascii=False)
+                    return f'Отчет записан в файл {file_path}.'
             except Exception as e:
                 return type(e).__name__
         return wrapper
@@ -60,27 +61,10 @@ def spending_by_category(transactions: pd.DataFrame,
     ]
     return filtered_transactions
 
-
-'2026-02-17 18:07:32.015166'
-transactions = read_excel_file("../data/operations.xlsx")
-print(spending_by_category(transactions,'Рестораны', '2019-02-17'))
-
-# ['Дата операции',
-#  'Дата платежа',
-#  'Номер карты',
-#  'Статус',
-#  'Сумма операции',
-#  'Валюта операции',
-#  'Сумма платежа',
-#  'Валюта платежа',
-#  'Кэшбэк',
-#  'Категория',
-#  'MCC',
-#  'Описание',
-#  'Бонусы (включая кэшбэк)',
-#  'Округление на инвесткопилку',
-#  'Сумма операции с округлением']
-
+# '2026-02-17 18:07:32.015166'
+# transactions = read_excel_file("../data/operations.xlsx")
+# print(spending_by_category(transactions,'Рестораны', '2019-02-17'))
+# ['Категория']
 # {'Авиабилеты',
 #  'Связь',
 #  'Сервис',
