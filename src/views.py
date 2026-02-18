@@ -1,5 +1,7 @@
 from typing import Any
 
+import pandas as pd
+
 from src.utils import (convert_amount_of_transactions, hello_by_current_time, price_of_stocks, read_excel_file,
                        read_json_file, sort_operations_by_date)
 
@@ -18,30 +20,38 @@ def main_web_site() -> Any:
     list_number_card = list(set(list(sorted_df_by_date["Номер карты"])))
     list_of_cards = []
     for card in list_number_card:
+        # Обработка строки (нормальный номер карты)
         if isinstance(card, str):
-            dict_sum_prices = {}
-            dict_sum_prices["last_digits"] = card[-4:]
-            sort_by_card = sorted_df_by_date[(sorted_df_by_date["Номер карты"] == card)]
-            sum_of_prices = sum(sort_by_card["Сумма платежа"])
-            dict_sum_prices["total_spent"] = round(sum_of_prices, 2)
-            if round(sum_of_prices, 2) < 0:
-                cashback = abs(sum_of_prices / 100)
-            else:
-                cashback = 0
-            dict_sum_prices["cashback"] = round(cashback, 2)
-            list_of_cards.append(dict_sum_prices)
-        elif isinstance(card, float):
-            dict_sum_prices = {}
-            dict_sum_prices["last_digits"] = str(card)
-            sort_by_card = sorted_df_by_date[(sorted_df_by_date["Номер карты"]).isna()]
-            sum_of_prices = sum(sort_by_card["Сумма платежа"])
-            dict_sum_prices["total_spent"] = round(sum_of_prices, 2)
-            if round(sum_of_prices, 2) < 0:
-                cashback = abs(sum_of_prices / 100)
-            else:
-                cashback = 0
-            dict_sum_prices["cashback"] = round(cashback, 2)
-            list_of_cards.append(dict_sum_prices)
+            last_digits = card[-4:] if len(card) >= 4 else card
+            mask = (sorted_df_by_date["Номер карты"] == card)
+
+        # Обработка отсутствующего значения (NaN, None)
+        elif pd.isna(card):
+            last_digits = "NaN"
+            mask = sorted_df_by_date["Номер карты"].isna()
+
+        # Обработка чисел (int, float, но не NaN)
+        else:
+            # Преобразуем в строку, удаляем возможные разделители
+            str_card = str(card).replace('.', '').replace(' ', '')
+            last_digits = str_card[-4:] if len(str_card) >= 4 else str_card
+            mask = (sorted_df_by_date["Номер карты"] == card)
+
+        # Расчёт суммы и кэшбэка
+        sort_by_card = sorted_df_by_date[mask]
+        sum_of_prices = sort_by_card["Сумма платежа"].sum()
+        rounded_sum = float(round(sum_of_prices, 2))
+        if rounded_sum < 0:
+            cashback = float(round(abs(rounded_sum / 100), 2))
+        else:
+            cashback = 0
+
+        dict_sum_prices = {
+            "last_digits": last_digits,
+            "total_spent": rounded_sum,
+            "cashback": cashback
+        }
+        list_of_cards.append(dict_sum_prices)
 
     # Формирование JSON-ответа в части "top_transactions".
     df_sorted_top_transactions = sorted_df_by_date.sort_values(
