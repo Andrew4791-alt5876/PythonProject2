@@ -117,5 +117,3 @@ def main_web_site() -> Any:
     }
     logger.info("Вывод JSON-ответа для web-сайта выполнен успешно")
     return message_to_frontend
-
-print(main_web_site())
