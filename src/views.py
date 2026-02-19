@@ -90,7 +90,7 @@ def main_web_site() -> Any:
         else:
             currrency_dict["rate"] = curse_to_rub
             list_course_currensies.append(currrency_dict)
-            logger.info("Сформирован JSON-ответ в части currency_rates")
+            logger.info(f"Курс валюты {currrency} доступен")
 
     # Формирование JSON-ответа в части "stock_prices".
     dict_course_stocks = price_of_stocks(user_setting_file[0]["user_stocks"])
@@ -117,3 +117,5 @@ def main_web_site() -> Any:
     }
     logger.info("Вывод JSON-ответа для web-сайта выполнен успешно")
     return message_to_frontend
+
+print(main_web_site())

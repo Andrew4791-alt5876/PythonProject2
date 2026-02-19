@@ -78,7 +78,7 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
 
 
 # transactions = read_excel_file("../data/operations.xlsx")
-# print(spending_by_category(transactions,'Рестораны', '2019-02-17'))
+# print(spending_by_category(transactions,'Супермаркеты', '2019-02-19'))
 # ['Категория']
 # {'Авиабилеты',
 #  'Связь',

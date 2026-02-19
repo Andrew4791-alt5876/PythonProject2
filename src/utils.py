@@ -81,15 +81,15 @@ def convert_amount_of_transactions(amount: float, currency: str) -> Union[float,
     """Функция конвертирования валюты из долларов или евро в рубли."""
     if currency not in ["USD", "EUR"]:
         logger.warning("Недопустимый код валюты для конвертации(допустимые: 'USD', 'EUR')")
-        return 0
+        return 10
     if amount <= 0:
         logger.warning("Сумма должна быть положительной")
-        return 0
+        return 20
     load_dotenv()
     API_KEY: str | None = os.getenv("API_KEY")
     if not API_KEY:
         logger.warning("API ключ не найден по курсу валюты")
-        return 0
+        return 30
     url = "https://api.apilayer.com/currency_data/convert"
     headers = {"apikey": API_KEY}
     params: Dict[str, Union[str, float]] = {"to": "RUB", "from": currency, "amount": amount}
@@ -97,20 +97,21 @@ def convert_amount_of_transactions(amount: float, currency: str) -> Union[float,
         response = requests.request("GET", url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         result = json.loads(response.text)
-        if "result" in result and isinstance(result["result"], (int, float)):
+        print(result)
+        if isinstance(result["result"], (int, float)):
             logger.info(f"Курс валюты {currency} получен успешно")
             return round(float(result["result"]), 2)
         else:
             logger.warning("Неверный формат ответа от API по курсу валюты")
-            return 0
+            return 40
     except requests.exceptions.RequestException as e:
         logger.error(f"Ошибка запроса: {str(e)}")
-        return 0
+        return 50
     except (json.JSONDecodeError, KeyError, ValueError) as e:
         logger.error(f"Ошибка обработки данных: {str(e)}")
-        return 0
+        return 60
 
-
+print(convert_amount_of_transactions(1, 'USD'))
 def price_of_stocks(stocks: Any) -> Any:
     """Функция для получения стоимости акций."""
     load_dotenv()
