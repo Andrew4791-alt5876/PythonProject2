@@ -30,7 +30,6 @@ class TestReadExcelFile:
         assert "Excel-файл преобразован в DataFrame успешно" in caplog.text
         mock_read_excel.assert_called_once_with("valid_file.xlsx")
 
-
     # Путь не строка
     @pytest.mark.parametrize("invalid_path", [123, None, ["path"], {"path": "value"}])
     def test_path_not_string(self, invalid_path: Any, caplog: Any) -> None:
@@ -39,7 +38,6 @@ class TestReadExcelFile:
             result = read_excel_file(invalid_path)
         assert result == []
         assert "Ошибка пути к excel-файлу" in caplog.text
-
 
     # Файл не найден
     @patch("src.utils.pd.read_excel", side_effect=FileNotFoundError("No such file"))
@@ -50,7 +48,6 @@ class TestReadExcelFile:
         assert result == []
         assert "Ошибка No such file" in caplog.text
 
-
     # Недостаточно прав
     @patch("src.utils.pd.read_excel", side_effect=PermissionError("Permission denied"))
     def test_permission_error(self, mock_read_excel: MagicMock, caplog: Any) -> None:
@@ -60,7 +57,6 @@ class TestReadExcelFile:
         assert result == []
         assert "Ошибка Permission denied" in caplog.text
 
-
     # Другие OSError
     @patch("src.utils.pd.read_excel", side_effect=OSError("Some OS error"))
     def test_os_error(self, mock_read_excel: MagicMock, caplog: Any) -> None:
@@ -69,7 +65,6 @@ class TestReadExcelFile:
             result = read_excel_file("problematic.xlsx")
         assert result == []
         assert "Ошибка Some OS error" in caplog.text
-
 
     # Другие исключения, не входящие в перехватываемые (например, ValueError)
     # В текущей реализации они не обрабатываются и приведут к падению теста.
@@ -95,14 +90,12 @@ class TestHelloByCurrentTime:
         assert result == "Доброе утро!"
         assert "Приветственное сообщение в 6 сформировано успешно как: Доброе утро!" in caplog.text
 
-
     @patch("src.utils.datetime")
     def test_morning_lower_bound(self, mock_datetime: Any) -> None:
         """Тест на выдачу сообщения 'Доброе утро!' при нижней границе времени."""
         mock_now = mock_datetime.now.return_value
         mock_now.hour = 6
         assert hello_by_current_time() == "Доброе утро!"
-
 
     @patch("src.utils.datetime")
     def test_morning_upper_bound(self, mock_datetime: Any) -> None:
@@ -174,7 +167,6 @@ class TestSortOperationsByDate:
         }
         return pd.DataFrame(data)
 
-
     @patch("src.utils.datetime")
     @patch("src.utils.random.randint")
     def test_success_filtering(
@@ -202,7 +194,6 @@ class TestSortOperationsByDate:
             f"с 1-го числа по {mock_now.day}, месяц {mock_now.month}, год {mock_randint.return_value}" in caplog.text
         )
 
-
     @patch("src.utils.datetime")
     @patch("src.utils.random.randint")
     def test_no_matching_records(
@@ -225,7 +216,6 @@ class TestSortOperationsByDate:
         assert result.empty
         assert "Сортировка DataFrame произведена успешно" in caplog.text
 
-
     @patch("src.utils.datetime")
     @patch("src.utils.random.randint")
     def test_missing_column(
@@ -246,7 +236,6 @@ class TestSortOperationsByDate:
         assert "Ошибка в функции sort_operations_by_date" in caplog.text
         assert "KeyError" in caplog.text or "Дата операции" in caplog.text
 
-
     def test_input_not_dataframe(self, caplog: Any) -> None:
         """Если на вход подан не DataFrame (например, список) -> TypeError -> возвращаем []."""
         not_df = [{"a": 1}]  # список словарей
@@ -255,7 +244,6 @@ class TestSortOperationsByDate:
         assert result == []
         assert "Ошибка в функции sort_operations_by_date" in caplog.text
         # Конкретное сообщение может быть разным, но важно, что логируется ошибка
-
 
     @patch("src.utils.datetime")
     @patch("src.utils.random.randint")
@@ -287,6 +275,7 @@ class TestSortOperationsByDate:
 # Тесты для convert_amount_of_transactions
 class TestConvertAmountOfTransactions:
     """Тесты для функции конвертации валют."""
+
     # Успешные сценарии
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
@@ -302,7 +291,6 @@ class TestConvertAmountOfTransactions:
         assert result == 7500.50
         assert "Курс валюты USD получен успешно" in caplog.text
 
-
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
     def test_success_eur(self, mock_getenv: MagicMock, mock_request: MagicMock, caplog: Any) -> None:
@@ -317,7 +305,6 @@ class TestConvertAmountOfTransactions:
         assert result == 9000.75
         assert "Курс валюты EUR получен успешно" in caplog.text
 
-
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
     def test_rounding(self, mock_getenv: MagicMock, mock_request: MagicMock) -> None:
@@ -329,7 +316,6 @@ class TestConvertAmountOfTransactions:
         mock_request.return_value = mock_response
         result = convert_amount_of_transactions(1.0, "USD")
         assert result == 75.68  # округление до двух знаков
-
 
     # Ошибочные сценарии
     @pytest.mark.parametrize(
@@ -346,7 +332,6 @@ class TestConvertAmountOfTransactions:
         assert result == 0
         assert "Недопустимый код валюты для конвертации(допустимые: 'USD', 'EUR')" in caplog.text
 
-
     @pytest.mark.parametrize("amount", [0, -10, -0.01])
     def test_non_positive_amount(self, amount: float, caplog: Any) -> None:
         """Сумма <= 0."""
@@ -354,7 +339,6 @@ class TestConvertAmountOfTransactions:
             result = convert_amount_of_transactions(amount, "USD")
         assert result == 0
         assert "Сумма должна быть положительной" in caplog.text
-
 
     @patch("src.utils.os.getenv")
     def test_missing_api_key(self, mock_getenv: MagicMock, caplog: Any) -> None:
@@ -365,7 +349,6 @@ class TestConvertAmountOfTransactions:
         assert result == 0
         assert "API ключ не найден по курсу валюты" in caplog.text
 
-
     @patch("src.utils.os.getenv")
     def test_empty_api_key(self, mock_getenv: MagicMock, caplog: Any) -> None:
         """Пустой API ключ."""
@@ -374,7 +357,6 @@ class TestConvertAmountOfTransactions:
             result = convert_amount_of_transactions(100.0, "USD")
         assert result == 0
         assert "API ключ не найден по курсу валюты" in caplog.text
-
 
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
@@ -386,7 +368,6 @@ class TestConvertAmountOfTransactions:
             result = convert_amount_of_transactions(100.0, "USD")
         assert result == 0
         assert "Ошибка запроса: Connection failed" in caplog.text
-
 
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
@@ -402,7 +383,6 @@ class TestConvertAmountOfTransactions:
         assert result == 0
         assert "Ошибка запроса: 404 Client Error" in caplog.text
 
-
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
     def test_timeout(self, mock_getenv: MagicMock, mock_request: MagicMock, caplog: Any) -> None:
@@ -413,7 +393,6 @@ class TestConvertAmountOfTransactions:
             result = convert_amount_of_transactions(100.0, "USD")
         assert result == 0
         assert "Ошибка запроса: Request timed out" in caplog.text
-
 
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
@@ -429,7 +408,6 @@ class TestConvertAmountOfTransactions:
         assert result == 0
         assert "Ошибка обработки данных: Expecting value" in caplog.text
 
-
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
     def test_no_result_field(self, mock_getenv: MagicMock, mock_request: MagicMock, caplog: Any) -> None:
@@ -443,7 +421,6 @@ class TestConvertAmountOfTransactions:
             result = convert_amount_of_transactions(100.0, "USD")
         assert result == 0
         assert "Неверный формат ответа от API по курсу валюты" in caplog.text
-
 
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")
@@ -484,7 +461,6 @@ class TestPriceOfStocks:
         assert "Стоимость акций AAPL получена успешно" in caplog.text
         mock_td_instance.price.assert_called_once_with(symbol="AAPL")
 
-
     @patch("src.utils.os.getenv")
     def test_missing_api_key(self, mock_getenv: MagicMock, caplog: Any) -> None:
         """Отсутствие API ключа (None)."""
@@ -494,7 +470,6 @@ class TestPriceOfStocks:
         assert result == {}
         assert "API ключ не найден по стоимости акций" in caplog.text
 
-
     @patch("src.utils.os.getenv")
     def test_empty_api_key(self, mock_getenv: MagicMock, caplog: Any) -> None:
         """Пустой API ключ."""
@@ -503,7 +478,6 @@ class TestPriceOfStocks:
             result = price_of_stocks("AAPL")
         assert result == {}
         assert "API ключ не найден по стоимости акций" in caplog.text
-
 
     @patch("src.utils.TDClient")
     @patch("src.utils.os.getenv")
@@ -518,7 +492,6 @@ class TestPriceOfStocks:
             result = price_of_stocks("AAPL")
         assert result == {}
         assert "Ошибка запроса: Connection error" in caplog.text
-
 
     @patch("src.utils.TDClient")
     @patch("src.utils.os.getenv")
@@ -535,7 +508,6 @@ class TestPriceOfStocks:
             result = price_of_stocks("AAPL")
         assert result == {}
         assert "Ошибка обработки данных: 'missing_field'" in caplog.text
-
 
     @patch("src.utils.TDClient")
     @patch("src.utils.os.getenv")
@@ -567,7 +539,6 @@ class TestReadJsonFile:
         assert "JSON-файл преобразован в DataFrame успешно" in caplog.text
         mock_file.assert_called_once_with("valid_path.json", "r", encoding="utf-8")
 
-
     # Путь не строка
     @pytest.mark.parametrize("invalid_path", [123, None, ["path"], {"path": "value"}])
     def test_path_not_string(self, invalid_path: Any, caplog: Any) -> None:
@@ -576,7 +547,6 @@ class TestReadJsonFile:
             result = read_json_file(invalid_path)
         assert result == []
         assert "Не верный формат пути к JSON-файлу" in caplog.text
-
 
     # Файл не найден
     @patch("builtins.open", side_effect=FileNotFoundError("No such file"))
@@ -587,7 +557,6 @@ class TestReadJsonFile:
         assert result == []
         assert "Ошибка No such file" in caplog.text
 
-
     # Недостаточно прав
     @patch("builtins.open", side_effect=PermissionError("Permission denied"))
     def test_permission_error(self, mock_open: MagicMock, caplog: Any) -> None:
@@ -596,7 +565,6 @@ class TestReadJsonFile:
             result = read_json_file("no_permission.json")
         assert result == []
         assert "Ошибка Permission denied" in caplog.text
-
 
     # Другие OSError
     @patch("builtins.open", side_effect=OSError("Some OS error"))
@@ -607,7 +575,6 @@ class TestReadJsonFile:
         assert result == []
         assert "Ошибка Some OS error" in caplog.text
 
-
     # Содержимое не список (например, словарь)
     @patch("builtins.open", new_callable=mock_open, read_data='{"key": "value"}')
     def test_content_not_list(self, mock_file: MagicMock, caplog: Any) -> None:
@@ -616,7 +583,6 @@ class TestReadJsonFile:
             result = read_json_file("dict.json")
         assert result == []
         assert "Не верный формат преобразования JSON-файла" in caplog.text
-
 
     # Некорректный JSON (ошибка парсинга)
     @patch("builtins.open", new_callable=mock_open, read_data='{"key": value"}')  # невалидный JSON

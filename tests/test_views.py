@@ -251,7 +251,7 @@ def test_missing_settings_keys(
     sample_transactions_df: Any,
 ) -> None:
     """Проверяет, что при отсутствии ключей в настройках функция падает с ошибкой (ожидаемо)."""
-    incomplete_settings = [{}]
+    incomplete_settings: dict[str, Any] = {}
     mock_hello.return_value = "Hi"
     mock_read_excel.return_value = sample_transactions_df
     mock_sort.return_value = sample_transactions_df
