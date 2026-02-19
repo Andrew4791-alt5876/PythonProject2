@@ -1,3 +1,4 @@
+from typing import Any
 from unittest.mock import patch
 
 import pandas as pd
@@ -14,15 +15,15 @@ from src.views import main_web_site
 @patch("src.views.read_excel_file")
 @patch("src.views.hello_by_current_time")
 def test_main_web_site_success(
-        mock_hello,
-        mock_read_excel,
-        mock_sort,
-        mock_read_json,
-        mock_convert,
-        mock_stocks,
-        sample_transactions_df,
-        user_settings
-):
+    mock_hello: Any,
+    mock_read_excel: Any,
+    mock_sort: Any,
+    mock_read_json: Any,
+    mock_convert: Any,
+    mock_stocks: Any,
+    sample_transactions_df: Any,
+    user_settings: Any,
+) -> None:
     """Проверяет корректное формирование JSON-ответа при типичных данных."""
     # Настройка моков
     mock_hello.return_value = "Добрый день!"
@@ -30,10 +31,7 @@ def test_main_web_site_success(
     mock_sort.return_value = sample_transactions_df  # предполагаем, что сортировка не меняет данные
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = lambda amount, currency: 90.5 if currency == "USD" else 100.2  # курсы
-    mock_stocks.return_value = {
-        "AAPL": {"price": "175.34"},
-        "GOOGL": {"price": "142.10"}
-    }
+    mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": "142.10"}}
 
     # Вызов тестируемой функции
     result = main_web_site()
@@ -95,14 +93,14 @@ def test_main_web_site_success(
 @patch("src.views.read_excel_file")
 @patch("src.views.hello_by_current_time")
 def test_main_web_site_empty_df(
-        mock_hello,
-        mock_read_excel,
-        mock_sort,
-        mock_read_json,
-        mock_convert,
-        mock_stocks,
-        user_settings
-):
+    mock_hello: Any,
+    mock_read_excel: Any,
+    mock_sort: Any,
+    mock_read_json: Any,
+    mock_convert: Any,
+    mock_stocks: Any,
+    user_settings: Any,
+) -> None:
     """Проверяет поведение при отсутствии транзакций (пустой DataFrame)."""
     empty_df = pd.DataFrame(columns=["Номер карты", "Дата операции", "Сумма платежа", "Категория", "Описание"])
 
@@ -132,21 +130,21 @@ def test_main_web_site_empty_df(
 @patch("src.views.read_excel_file")
 @patch("src.views.hello_by_current_time")
 def test_main_web_site_card_types(
-        mock_hello,
-        mock_read_excel,
-        mock_sort,
-        mock_read_json,
-        mock_convert,
-        mock_stocks,
-        user_settings
-):
+    mock_hello: Any,
+    mock_read_excel: Any,
+    mock_sort: Any,
+    mock_read_json: Any,
+    mock_convert: Any,
+    mock_stocks: Any,
+    user_settings: Any,
+) -> None:
     """Проверяет корректную обработку разных представлений номеров карт."""
     data = {
         "Номер карты": ["1234 5678 9012 3456", 1234567890123456, None, float("nan")],
         "Дата операции": ["01.01.2023", "02.01.2023", "03.01.2023", "04.01.2023"],
         "Сумма платежа": [100, -50, 200, 300],
         "Категория": ["A", "B", "C", "D"],
-        "Описание": ["a", "b", "c", "d"]
+        "Описание": ["a", "b", "c", "d"],
     }
     df = pd.DataFrame(data)
 
@@ -160,8 +158,6 @@ def test_main_web_site_card_types(
     result = main_web_site()
 
     cards = result["cards"]
-    # Ожидаем 4 карты: строковая, целочисленная (превратится в строку), два NaN (они будут объединены? Нет, код обрабатывает каждую строку отдельно: для float он берёт .isna() и суммирует все NaN в одну группу? Нет, он проходит по list(set(...)), поэтому NaN будет один раз, но код проверяет isinstance(card, float) и выбирает все строки с NaN. Это работает, потому что float('nan') не равен самому себе, но set превратит NaN в один элемент. Хорошо.
-    # В set попадут: строка, число (превратится в строку? нет, останется числом), NaN (float). Итого 3 уникальных: строка, число, NaN.
     assert len(cards) >= 3
 
     # Проверим обработку NaN
@@ -171,7 +167,7 @@ def test_main_web_site_card_types(
 
     # Проверим числовую карту (она будет преобразована в строку целиком)
     num_card = next(c for c in cards if isinstance(c["last_digits"], str))
-    assert num_card["total_spent"] == -50
+    assert num_card["total_spent"] == -50.0
     assert num_card["cashback"] == 0.5  # abs(-50)/100
 
     # Проверим строковую карту
@@ -188,21 +184,21 @@ def test_main_web_site_card_types(
 @patch("src.views.read_excel_file")
 @patch("src.views.hello_by_current_time")
 def test_top_transactions_absolute_sort(
-        mock_hello,
-        mock_read_excel,
-        mock_sort,
-        mock_read_json,
-        mock_convert,
-        mock_stocks,
-        user_settings
-):
+    mock_hello: Any,
+    mock_read_excel: Any,
+    mock_sort: Any,
+    mock_read_json: Any,
+    mock_convert: Any,
+    mock_stocks: Any,
+    user_settings: Any,
+) -> None:
     """Проверяет, что top_transactions сортируются по абсолютной величине суммы."""
     data = {
         "Номер карты": ["1", "2", "3", "4", "5", "6"],
         "Дата операции": ["01.01.2023"] * 6,
         "Сумма платежа": [100, -200, 300, -400, 50, -10],
         "Категория": ["A"] * 6,
-        "Описание": ["a"] * 6
+        "Описание": ["a"] * 6,
     }
     df = pd.DataFrame(data)
 
@@ -228,15 +224,15 @@ def test_top_transactions_absolute_sort(
 @patch("src.views.read_excel_file")
 @patch("src.views.hello_by_current_time")
 def test_currencies_and_stocks_handling(
-        mock_hello,
-        mock_read_excel,
-        mock_sort,
-        mock_read_json,
-        mock_convert,
-        mock_stocks,
-        sample_transactions_df,
-        user_settings
-):
+    mock_hello: Any,
+    mock_read_excel: Any,
+    mock_sort: Any,
+    mock_read_json: Any,
+    mock_convert: Any,
+    mock_stocks: Any,
+    sample_transactions_df: Any,
+    user_settings: Any,
+) -> None:
     """Проверяет корректную обработку валют и акций при разных возвращаемых значениях."""
     mock_hello.return_value = "Hi"
     mock_read_excel.return_value = sample_transactions_df
@@ -245,10 +241,7 @@ def test_currencies_and_stocks_handling(
 
     # Курсы валют: одна возвращает число, другая строку (должна преобразоваться)
     mock_convert.side_effect = [90.5, "100.2"]  # строка будет передана в JSON как есть, но код не преобразует
-    mock_stocks.return_value = {
-        "AAPL": {"price": "175.34"},
-        "GOOGL": {"price": 142.10}  # число
-    }
+    mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": 142.10}}  # число
 
     result = main_web_site()
 
@@ -270,22 +263,20 @@ def test_currencies_and_stocks_handling(
 @patch("src.views.read_excel_file")
 @patch("src.views.hello_by_current_time")
 def test_missing_settings_keys(
-        mock_hello,
-        mock_read_excel,
-        mock_sort,
-        mock_read_json,
-        mock_convert,
-        mock_stocks,
-        sample_transactions_df
-):
+    mock_hello: Any,
+    mock_read_excel: Any,
+    mock_sort: Any,
+    mock_read_json: Any,
+    mock_convert: Any,
+    mock_stocks: Any,
+    sample_transactions_df: Any,
+) -> None:
     """Проверяет, что при отсутствии ключей в настройках функция падает с ошибкой (ожидаемо)."""
-    incomplete_settings = [{}]  # нет ключей user_currencies и user_stocks
-
+    incomplete_settings = [{}]
     mock_hello.return_value = "Hi"
     mock_read_excel.return_value = sample_transactions_df
     mock_sort.return_value = sample_transactions_df
     mock_read_json.return_value = incomplete_settings
-
     # Функция должна упасть с KeyError при обращении к отсутствующим ключам
     with pytest.raises(KeyError):
         main_web_site()
