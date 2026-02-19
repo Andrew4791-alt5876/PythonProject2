@@ -227,12 +227,9 @@ def test_sort_operations_by_user_month_year_no_matches(mock_year: Any, mock_mont
     """Если нет транзакций за указанный месяц/год, возвращается пустой DataFrame."""
     mock_month.return_value = 12
     mock_year.return_value = 2019
-
     data = {"Дата операции": ["15.05.2020 12:30:00", "20.05.2020 14:20:00"]}
     df = pd.DataFrame(data)
-
     result = sort_operations_by_user_month_year(df)
-
     assert result.empty
     mock_month.assert_called_once()
     mock_year.assert_called_once()
@@ -244,7 +241,6 @@ def test_sort_operations_by_user_month_year_invalid_dates(mock_year: Any, mock_m
     """Строки с некорректными датами (NaT) должны игнорироваться при фильтрации."""
     mock_month.return_value = 3
     mock_year.return_value = 2021
-
     data = {
         "Дата операции": [
             "15.03.2021 12:30:00",  # подходит
@@ -254,9 +250,7 @@ def test_sort_operations_by_user_month_year_invalid_dates(mock_year: Any, mock_m
         ]
     }
     df = pd.DataFrame(data)
-
     result = sort_operations_by_user_month_year(df)
-
     assert len(result) == 2
     assert all(result["Дата операции"].dt.month == 3)
     assert all(result["Дата операции"].dt.year == 2021)
@@ -268,11 +262,8 @@ def test_sort_operations_by_user_month_year_empty_df(mock_year: Any, mock_month:
     """Пустой DataFrame на входе должен вернуть пустой DataFrame."""
     mock_month.return_value = 7
     mock_year.return_value = 2022
-
     df = pd.DataFrame(columns=["Дата операции"])
-
     result = sort_operations_by_user_month_year(df)
-
     assert result.empty
     # Всё равно должны быть вызваны функции ввода
     mock_month.assert_called_once()
@@ -285,7 +276,6 @@ def test_sort_operations_by_user_month_year_month_year_order(mock_year: Any, moc
     """Проверка, что фильтрация сначала по месяцу, потом по году (логика не важна, главное результат)."""
     mock_month.return_value = 8
     mock_year.return_value = 2018
-
     data = {
         "Дата операции": [
             "15.08.2018 12:30:00",  # подходит
@@ -294,9 +284,7 @@ def test_sort_operations_by_user_month_year_month_year_order(mock_year: Any, moc
         ]
     }
     df = pd.DataFrame(data)
-
     result = sort_operations_by_user_month_year(df)
-
     assert len(result) == 1
     assert result.iloc[0]["Дата операции"] == pd.Timestamp("2018-08-15 12:30:00")
 
@@ -312,14 +300,11 @@ def test_sort_data_by_categories_success(mock_read_excel: Any, mock_sort: Any) -
         "Сумма платежа": [100.50, 250.00, -50.00, 300.75, 200.00, 50.00],
     }
     filtered_df = pd.DataFrame(data)
-
     # Настройка моков
     mock_read_excel.return_value = pd.DataFrame()  # не важно, что возвращает, главное чтобы был вызван
     mock_sort.return_value = filtered_df
-
     # Вызов тестируемой функции
     result = sort_data_by_categories()
-
     # Ожидаемый результат после группировки и удаления исключённых категорий:
     # Группировка: Супермаркеты = 150.5 (100.5+50), Аптеки = 250, Кафе = 300.75
     # Исключаем: Переводы (-50), Бонусы (200)
@@ -338,7 +323,6 @@ def test_sort_data_by_categories_no_excluded_categories(mock_read_excel: Any, mo
     filtered_df = pd.DataFrame(data)
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = filtered_df
-
     result = sort_data_by_categories()
     # После сортировки по возрастанию: Телефон (150.25), Интернет (300.5), Такси (500)
     expected = {"Телефон": 150.25, "Интернет": 300.5, "Такси": 500.0}
@@ -352,7 +336,6 @@ def test_sort_data_by_categories_empty_after_filter(mock_read_excel: Any, mock_s
     empty_df = pd.DataFrame(columns=["Категория", "Сумма платежа"])
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = empty_df
-
     result = sort_data_by_categories()
     assert result == {}
 
@@ -368,7 +351,6 @@ def test_sort_data_by_categories_all_excluded(mock_read_excel: Any, mock_sort: A
     filtered_df = pd.DataFrame(data)
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = filtered_df
-
     result = sort_data_by_categories()
     assert result == {}
 
@@ -381,7 +363,6 @@ def test_sort_data_by_categories_rounding(mock_read_excel: Any, mock_sort: Any) 
     filtered_df = pd.DataFrame(data)
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = filtered_df
-
     result = sort_data_by_categories()
     expected = {"Продукты": 100.56, "Одежда": 201.0}
     assert result == expected

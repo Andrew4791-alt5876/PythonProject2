@@ -5,7 +5,6 @@ import pandas as pd
 
 from src.utils import read_excel_file
 
-
 logger = logging.getLogger("services")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler(
@@ -18,8 +17,7 @@ logger.addHandler(file_handler)
 
 def input_user_month() -> int | None:
     """Функция для получения месяца от пользователя."""
-    user_month = input("Введите месяц за который необходим анализ\n"
-                       "(от 1 до 12, где 1-январь...12-декабрь): ")
+    user_month = input("Введите месяц за который необходим анализ\n" "(от 1 до 12, где 1-январь...12-декабрь): ")
     while user_month or user_month == "":
         if user_month.isdigit():
             if 1 <= int(user_month) <= 12:
@@ -27,13 +25,11 @@ def input_user_month() -> int | None:
                 return int(user_month)
             else:
                 user_month = input(
-                    "Не верные данные ввода месяца, попробуйте еще раз\n"
-                    "(от 1 до 12, где 1-январь...12-декабрь): "
+                    "Не верные данные ввода месяца, попробуйте еще раз\n" "(от 1 до 12, где 1-январь...12-декабрь): "
                 )
         else:
             user_month = input(
-                "Не верные данные ввода месяца, попробуйте еще раз\n"
-                "(от 1 до 12, где 1-январь...12-декабрь): "
+                "Не верные данные ввода месяца, попробуйте еще раз\n" "(от 1 до 12, где 1-январь...12-декабрь): "
             )
     return None
 
@@ -53,7 +49,7 @@ def input_user_year() -> int | None:
     return None
 
 
-def sort_operations_by_user_month_year(data_frame: Any = [] ) -> Any:
+def sort_operations_by_user_month_year(data_frame: Any = []) -> Any:
     """Функция, которая выполняет выборку базы данных по месяцу и году от пользователя."""
     input_month = input_user_month()
     input_year = input_user_year()
@@ -63,7 +59,7 @@ def sort_operations_by_user_month_year(data_frame: Any = [] ) -> Any:
         )
         sort_df_by_month = data_frame[(data_frame["Дата операции"].dt.month == input_month)]
         sort_df_by_user = sort_df_by_month[(sort_df_by_month["Дата операции"].dt.year == input_year)]
-        logger.info(f"DataFrame по выбранному месяцу и году отсортирован корректно")
+        logger.info("DataFrame по выбранному месяцу и году отсортирован корректно")
         return sort_df_by_user
     except (TypeError, KeyError) as ef:
         logger.error(f"Ошибка в функции sort_operations_by_user_month_year {str(ef)}")
@@ -81,7 +77,7 @@ def sort_data_by_categories() -> dict:
         for category in list_of_categories:
             sorted_items.pop(category, None)
         sorted_items_rounded = {k: round(v, 2) for k, v in sorted_items.items()}
-        logger.info(f"DataFrame преобразован в словарь 'категория: cумма платежа' корректно")
+        logger.info("DataFrame преобразован в словарь 'категория: cумма платежа' корректно")
         return sorted_items_rounded
     except AttributeError as e:
         logger.error(f"Ошибка загрузки DataFrame {str(e)}")

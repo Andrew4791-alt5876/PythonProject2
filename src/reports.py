@@ -68,13 +68,13 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     try:
         transactions["Дата операции"] = pd.to_datetime(transactions["Дата операции"], dayfirst=True)
         filtered_transactions = transactions.loc[
-            (transactions["Дата операции"] >= start_date) &
-            (transactions["Дата операции"] < sort_finish_data) &
-            (transactions["Категория"] == category)
+            (transactions["Дата операции"] >= start_date)
+            & (transactions["Дата операции"] < sort_finish_data)
+            & (transactions["Категория"] == category)
         ]
         return filtered_transactions
     except Exception as exc:
-        return (f'Ошибка {str(exc)}')
+        return f"Ошибка {str(exc)}"
 
 
 # transactions = read_excel_file("../data/operations.xlsx")

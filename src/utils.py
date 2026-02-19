@@ -11,7 +11,6 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 from twelvedata import TDClient
 
-
 logger = logging.getLogger("utils")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler(
@@ -56,7 +55,7 @@ def hello_by_current_time() -> str:
     return hello_message
 
 
-def sort_operations_by_date(data_frame: Any=[]) -> Any:
+def sort_operations_by_date(data_frame: Any = []) -> Any:
     """Функция, которая выполняет выборку с 1-го по текущую дату текущего месяца,
     год выбирается случайно в рамках базы данных."""
     try:
@@ -69,7 +68,9 @@ def sort_operations_by_date(data_frame: Any=[]) -> Any:
         sort_df_by_month = sort_df_by_dates[(sort_df_by_dates["Дата операции"].dt.month == now_month)]
         randon_year = random.randint(2018, 2021)
         sort_df_by_year = sort_df_by_month[(sort_df_by_month["Дата операции"].dt.year == randon_year)]
-        logger.info(f"Сортировка DataFrame произведена успешно с 1-го числа по {now_day}, месяц {now_month}, год {randon_year}")
+        logger.info(
+            f"Сортировка DataFrame произведена успешно с 1-го числа по {now_day}, месяц {now_month}, год {randon_year}"
+        )
         return sort_df_by_year
     except (TypeError, KeyError) as er:
         logger.error(f"Ошибка в функции sort_operations_by_date {str(er)}")

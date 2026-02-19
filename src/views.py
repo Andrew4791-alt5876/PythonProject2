@@ -6,7 +6,6 @@ import pandas as pd
 from src.utils import (convert_amount_of_transactions, hello_by_current_time, price_of_stocks, read_excel_file,
                        read_json_file, sort_operations_by_date)
 
-
 logger = logging.getLogger("views")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler(

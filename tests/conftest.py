@@ -1,6 +1,6 @@
 import os
 import tempfile
-from typing import Generator, Any
+from typing import Any, Generator
 
 import pandas as pd
 import pytest

@@ -32,17 +32,13 @@ def test_main_web_site_success(
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = lambda amount, currency: 90.5 if currency == "USD" else 100.2  # курсы
     mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": "142.10"}}
-
     # Вызов тестируемой функции
     result = main_web_site()
-
     # Проверка структуры ответа
     assert isinstance(result, dict)
     assert set(result.keys()) == {"greeting", "cards", "top_transactions", "currency_rates", "stock_prices"}
-
     # Проверка приветствия
     assert result["greeting"] == "Добрый день!"
-
     # Проверка карт
     cards = result["cards"]
     assert len(cards) == 3  # две карты + одна запись с NaN
@@ -58,7 +54,6 @@ def test_main_web_site_success(
     nan_card = next(c for c in cards if c["last_digits"] == "NaN")
     assert nan_card["total_spent"] == 50.00
     assert nan_card["cashback"] == 0.0  # так как сумма положительная, cashback = 0
-
     # Проверка top_transactions (должны быть отсортированы по убыванию абсолютной суммы)
     top = result["top_transactions"]
     assert len(top) == 4  # всего 4 записи в df
@@ -67,7 +62,6 @@ def test_main_web_site_success(
     assert top[1]["amount"] == -1500.50
     assert top[2]["amount"] == 200.75
     assert top[3]["amount"] == 50.00
-
     # Проверка валют
     currencies = result["currency_rates"]
     assert len(currencies) == 2
@@ -75,7 +69,6 @@ def test_main_web_site_success(
     assert currencies[0]["rate"] == 90.5
     assert currencies[1]["currency"] == "EUR"
     assert currencies[1]["rate"] == 100.2
-
     # Проверка акций
     stocks = result["stock_prices"]
     assert len(stocks) == 2
@@ -103,16 +96,13 @@ def test_main_web_site_empty_df(
 ) -> None:
     """Проверяет поведение при отсутствии транзакций (пустой DataFrame)."""
     empty_df = pd.DataFrame(columns=["Номер карты", "Дата операции", "Сумма платежа", "Категория", "Описание"])
-
     mock_hello.return_value = "Доброй ночи!"
     mock_read_excel.return_value = empty_df
     mock_sort.return_value = empty_df
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = [90.5, 100.2]
     mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": "142.10"}}
-
     result = main_web_site()
-
     # Проверка карт: список должен быть пустым
     assert result["cards"] == []
     # top_transactions: пустой список
@@ -147,29 +137,23 @@ def test_main_web_site_card_types(
         "Описание": ["a", "b", "c", "d"],
     }
     df = pd.DataFrame(data)
-
     mock_hello.return_value = "Hi"
     mock_read_excel.return_value = df
     mock_sort.return_value = df
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = [90.5, 100.2]
     mock_stocks.return_value = {"AAPL": {"price": "175"}, "GOOGL": {"price": "142"}}
-
     result = main_web_site()
-
     cards = result["cards"]
     assert len(cards) >= 3
-
     # Проверим обработку NaN
     nan_card = next(c for c in cards if c["last_digits"] == "NaN")
     assert nan_card["total_spent"] == 500  # сумма по всем NaN (200+300)
     assert nan_card["cashback"] == 0
-
     # Проверим числовую карту (она будет преобразована в строку целиком)
     num_card = next(c for c in cards if isinstance(c["last_digits"], str))
     assert num_card["total_spent"] == -50.0
     assert num_card["cashback"] == 0.5  # abs(-50)/100
-
     # Проверим строковую карту
     str_card = next(c for c in cards if c["last_digits"] == "3456")
     assert str_card["total_spent"] == -50.0
@@ -208,7 +192,6 @@ def test_top_transactions_absolute_sort(
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = [90.5, 100.2]
     mock_stocks.return_value = {"AAPL": {"price": "175"}, "GOOGL": {"price": "142"}}
-
     result = main_web_site()
     top = result["top_transactions"]
     # Должны быть первые 5 записей по убыванию абсолютной суммы: -400, 300, -200, 100, 50 (или -10 не входит)
@@ -238,17 +221,13 @@ def test_currencies_and_stocks_handling(
     mock_read_excel.return_value = sample_transactions_df
     mock_sort.return_value = sample_transactions_df
     mock_read_json.return_value = user_settings
-
     # Курсы валют: одна возвращает число, другая строку (должна преобразоваться)
     mock_convert.side_effect = [90.5, "100.2"]  # строка будет передана в JSON как есть, но код не преобразует
     mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": 142.10}}  # число
-
     result = main_web_site()
-
     currencies = result["currency_rates"]
     # Проверим, что второй курс пришёл как строка "100.2", а не число
     assert currencies[1]["rate"] == "100.2"
-
     stocks = result["stock_prices"]
     # Цена AAPL должна быть float 175.34, GOOGL float 142.1
     assert stocks[0]["price"] == 175.34
