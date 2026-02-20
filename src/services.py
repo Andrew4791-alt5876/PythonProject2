@@ -66,10 +66,9 @@ def sort_operations_by_user_month_year(data_frame: Any = []) -> Any:
         return {}
 
 
-def sort_data_by_categories() -> dict:
+def sort_data_by_categories(df_excel) -> dict:
     """Функция, которая преобразовывает базу данных в словарь {категория: сумма платежа}."""
     try:
-        df_excel = read_excel_file("../data/operations.xlsx")
         df_choose_user = sort_operations_by_user_month_year(df_excel)
         df_grouped = df_choose_user.groupby("Категория")["Сумма платежа"].sum().to_dict()
         sorted_items = dict(sorted(df_grouped.items(), key=lambda item: item[1], reverse=False))

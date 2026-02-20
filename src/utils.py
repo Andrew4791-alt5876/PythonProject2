@@ -55,7 +55,7 @@ def hello_by_current_time() -> str:
     return hello_message
 
 
-def sort_operations_by_date(data_frame: Any = []) -> Any:
+def sort_operations_by_date(data_frame: Any) -> Any:
     """Функция, которая выполняет выборку с 1-го по текущую дату текущего месяца,
     год выбирается случайно в рамках базы данных."""
     try:

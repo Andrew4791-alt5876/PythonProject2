@@ -6,8 +6,6 @@ from typing import Any, Callable, Optional
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-# from src.utils import read_excel_file
-
 
 logger = logging.getLogger("reports")
 logger.setLevel(logging.DEBUG)
@@ -35,7 +33,7 @@ def log_reports(filename: Any | None = None) -> Any:
                 # Генерируем имя файла по умолчанию
                 timestamp = datetime.now().strftime("%Y%m%d")
                 func_name = func.__name__
-                file_path = f"../log_report/report_{func_name}_{timestamp}.json"
+                file_path = f"log_report/_{func_name}_{timestamp}.json"
                 logger.info(f"Путь для сохранения отчета {filename} сгенерирован автоматически")
             try:
                 with open(file_path, "w", encoding="utf-8") as f:
@@ -75,58 +73,3 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
         return filtered_transactions
     except Exception as exc:
         return f"Ошибка {str(exc)}"
-
-
-# transactions = read_excel_file("../data/operations.xlsx")
-# print(spending_by_category(transactions,'Супермаркеты', '2019-02-19'))
-# ['Категория']
-# {'Авиабилеты',
-#  'Связь',
-#  'Сервис',
-#  'Услуги банка',
-#  'Зарплата',
-#  'Пополнения',
-#  'ЖКХ',
-#  'Медицина',
-#  'Отели',
-#  'НКО',
-#  'Фастфуд',
-#  'Развлечения',
-#  'Рестораны',
-#  'Такси',
-#  'Книги',
-#  'Ж/д билеты',
-#  'Мобильная связь',
-#  'Каршеринг',
-#  'Транспорт',
-#  'Детские товары',
-#  'Наличные',
-#  'Красота',
-#  nan,
-#  'Аптеки',
-#  'Фото и видео',
-#  'Онлайн-кинотеатры',
-#  'Турагентства',
-#  'Спорттовары',
-#  'Другое',
-#  'Местный транспорт',
-#  'Переводы',
-#  'Сувениры',
-#  'Цветы',
-#  'Различные товары',
-#  'Супермаркеты',
-#  'Дом и ремонт',
-#  'Образование',
-#  'Топливо',
-#  'Автоуслуги',
-#  'Кино',
-#  'Частные услуги',
-#  'Косметика',
-#  'Электроника и техника',
-#  'Финансы',
-#  'Канцтовары',
-#  'Duty Free',
-#  'Госуслуги',
-#  'Искусство',
-#  'Бонусы',
-#  'Одежда и обувь'}

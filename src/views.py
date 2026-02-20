@@ -16,7 +16,7 @@ file_handler.setFormatter(file_formater)
 logger.addHandler(file_handler)
 
 
-def main_web_site() -> Any:
+def main_web_site(df_transactions) -> Any:
     """Функция генерации JSON-ответа для страницы «Главная»."""
 
     # Формирование JSON-ответа в части "greeting".
@@ -24,33 +24,32 @@ def main_web_site() -> Any:
     logger.info("Приветствие создано")
 
     # Преобразование excel-файла в DataFrame.
-    df_excel = read_excel_file("../data/operations.xlsx")
-    sorted_df_by_date = sort_operations_by_date(df_excel)
+    sorted_df_date = sort_operations_by_date(df_transactions)
     logger.info("База данных преобразована в DataFrame")
 
     # Формирование JSON-ответа в части "cards".
-    list_number_card = list(set(list(sorted_df_by_date["Номер карты"])))
+    list_number_card = sorted_df_date["Номер карты"].unique().tolist()
     list_of_cards = []
     for card in list_number_card:
         # Обработка строки (нормальный номер карты)
         if isinstance(card, str):
             last_digits = card[-4:] if len(card) >= 4 else card
-            mask = sorted_df_by_date["Номер карты"] == card
+            mask = sorted_df_date["Номер карты"] == card
 
         # Обработка отсутствующего значения (NaN, None)
         elif pd.isna(card):
             last_digits = "NaN"
-            mask = sorted_df_by_date["Номер карты"].isna()
+            mask = sorted_df_date["Номер карты"].isna()
 
         # Обработка чисел (int, float, но не NaN)
         else:
             # Преобразуем в строку, удаляем возможные разделители
             str_card = str(card).replace(".", "").replace(" ", "")
             last_digits = str_card[-4:] if len(str_card) >= 4 else str_card
-            mask = sorted_df_by_date["Номер карты"] == card
+            mask = sorted_df_date["Номер карты"] == card
 
         # Расчёт суммы и кэшбэка
-        sort_by_card = sorted_df_by_date[mask]
+        sort_by_card = sorted_df_date[mask]
         sum_of_prices = sort_by_card["Сумма платежа"].sum()
         rounded_sum = float(round(sum_of_prices, 2))
         if rounded_sum < 0:
@@ -63,7 +62,7 @@ def main_web_site() -> Any:
     logger.info("Сформирован JSON-ответ в части cards")
 
     # Формирование JSON-ответа в части "top_transactions".
-    df_sorted_top_transactions = sorted_df_by_date.sort_values(
+    df_sorted_top_transactions = sorted_df_date.sort_values(
         by="Сумма платежа", key=lambda col: col.abs(), ascending=False
     )
     list_info_top = df_sorted_top_transactions.head(5).to_dict("records")
@@ -79,33 +78,33 @@ def main_web_site() -> Any:
     logger.info("Сформирован JSON-ответ в части top_transactions")
 
     # Формирование JSON-ответа в части "currency_rates".
-    user_setting_file = read_json_file("C:/Users/User/PycharmProjects/PythonProject2/user_settings.json")
+    # user_setting_file = read_json_file("C:/Users/User/PycharmProjects/PythonProject2/user_settings.json")
     list_course_currensies = []
-    for currrency in user_setting_file[0]["user_currencies"]:
-        currrency_dict = {}
-        currrency_dict["currency"] = currrency
-        curse_to_rub = convert_amount_of_transactions(1, currrency)
-        if curse_to_rub == 0:
-            logger.warning(f"Курс валюты {currrency} не доступен")
-        else:
-            currrency_dict["rate"] = curse_to_rub
-            list_course_currensies.append(currrency_dict)
-            logger.info(f"Курс валюты {currrency} доступен")
+    # for currrency in user_setting_file[0]["user_currencies"]:
+    #     currrency_dict = {}
+    #     currrency_dict["currency"] = currrency
+    #     curse_to_rub = convert_amount_of_transactions(1, currrency)
+    #     if curse_to_rub == 0:
+    #         logger.warning(f"Курс валюты {currrency} не доступен")
+    #     else:
+    #         currrency_dict["rate"] = curse_to_rub
+    #         list_course_currensies.append(currrency_dict)
+    #         logger.info(f"Курс валюты {currrency} доступен")
 
     # Формирование JSON-ответа в части "stock_prices".
-    dict_course_stocks = price_of_stocks(user_setting_file[0]["user_stocks"])
+    # dict_course_stocks = price_of_stocks(user_setting_file[0]["user_stocks"])
     list_course_stocks = []
-    for i in user_setting_file[0]["user_stocks"]:
-        dict_stocks = {}
-        dict_stocks["stock"] = i
-        if dict_course_stocks != {}:
-            dict_stocks["price"] = round(float(dict_course_stocks[i]["price"]), 2)
-            list_course_stocks.append(dict_stocks)
-            logger.info("Сформирован JSON-ответ в части stock_prices")
-        else:
-            dict_stocks["price"] = 0
-            list_course_stocks.append(dict_stocks)
-            logger.warning(f"Стоимость акции {i} не доступна")
+    # for i in user_setting_file[0]["user_stocks"]:
+    #     dict_stocks = {}
+    #     dict_stocks["stock"] = i
+    #     if dict_course_stocks != {}:
+    #         dict_stocks["price"] = round(float(dict_course_stocks[i]["price"]), 2)
+    #         list_course_stocks.append(dict_stocks)
+    #         logger.info("Сформирован JSON-ответ в части stock_prices")
+    #     else:
+    #         dict_stocks["price"] = 0
+    #         list_course_stocks.append(dict_stocks)
+    #         logger.warning(f"Стоимость акции {i} не доступна")
 
     # Вывод JSON-ответа для web-сайта.
     message_to_frontend = {
@@ -117,3 +116,6 @@ def main_web_site() -> Any:
     }
     logger.info("Вывод JSON-ответа для web-сайта выполнен успешно")
     return message_to_frontend
+
+
+# print(main_web_site())
