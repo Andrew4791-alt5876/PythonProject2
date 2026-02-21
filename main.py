@@ -6,10 +6,13 @@ from src.views import main_web_site
 if __name__ == '__main__':
     transactions = read_excel_file("data/operations.xlsx")
 
+    print('Вывод информации для страницы "Главная":')
     print(main_web_site(transactions))
     print('#' * 150)
+    print('Сервисы: вывод информации(Выгодные категории повышенного кэшбэка):')
     print(sort_data_by_categories(transactions))
     print('#' * 150)
+    print('Информация об отчете(Траты по категории):')
     print(spending_by_category(transactions,'Связь', '2019-02-19'))
 
 
