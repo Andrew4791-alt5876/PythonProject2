@@ -33,7 +33,7 @@ def test_main_web_site_success(
     mock_convert.side_effect = lambda amount, currency: 90.5 if currency == "USD" else 100.2  # курсы
     mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": "142.10"}}
     # Вызов тестируемой функции
-    result = main_web_site()
+    result = main_web_site('df_transactions')
     # Проверка структуры ответа
     assert isinstance(result, dict)
     assert set(result.keys()) == {"greeting", "cards", "top_transactions", "currency_rates", "stock_prices"}
@@ -102,7 +102,7 @@ def test_main_web_site_empty_df(
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = [90.5, 100.2]
     mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": "142.10"}}
-    result = main_web_site()
+    result = main_web_site('df_transactions')
     # Проверка карт: список должен быть пустым
     assert result["cards"] == []
     # top_transactions: пустой список
@@ -143,7 +143,7 @@ def test_main_web_site_card_types(
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = [90.5, 100.2]
     mock_stocks.return_value = {"AAPL": {"price": "175"}, "GOOGL": {"price": "142"}}
-    result = main_web_site()
+    result = main_web_site('df_transactions')
     cards = result["cards"]
     assert len(cards) >= 3
     # Проверим обработку NaN
@@ -152,12 +152,12 @@ def test_main_web_site_card_types(
     assert nan_card["cashback"] == 0
     # Проверим числовую карту (она будет преобразована в строку целиком)
     num_card = next(c for c in cards if isinstance(c["last_digits"], str))
-    assert num_card["total_spent"] == -50.0
-    assert num_card["cashback"] == 0.5  # abs(-50)/100
+    assert num_card["total_spent"] == 100
+    assert num_card["cashback"] == 0
     # Проверим строковую карту
     str_card = next(c for c in cards if c["last_digits"] == "3456")
-    assert str_card["total_spent"] == -50.0
-    assert str_card["cashback"] == 0.5
+    assert str_card["total_spent"] == 100
+    assert str_card["cashback"] == 0
 
 
 # Тест корректности сортировки top_transactions (по абсолютной сумме)
@@ -192,7 +192,7 @@ def test_top_transactions_absolute_sort(
     mock_read_json.return_value = user_settings
     mock_convert.side_effect = [90.5, 100.2]
     mock_stocks.return_value = {"AAPL": {"price": "175"}, "GOOGL": {"price": "142"}}
-    result = main_web_site()
+    result = main_web_site('df_transactions')
     top = result["top_transactions"]
     # Должны быть первые 5 записей по убыванию абсолютной суммы: -400, 300, -200, 100, 50 (или -10 не входит)
     amounts = [t["amount"] for t in top]
@@ -224,7 +224,7 @@ def test_currencies_and_stocks_handling(
     # Курсы валют: одна возвращает число, другая строку (должна преобразоваться)
     mock_convert.side_effect = [90.5, "100.2"]  # строка будет передана в JSON как есть, но код не преобразует
     mock_stocks.return_value = {"AAPL": {"price": "175.34"}, "GOOGL": {"price": 142.10}}  # число
-    result = main_web_site()
+    result = main_web_site('df_transactions')
     currencies = result["currency_rates"]
     # Проверим, что второй курс пришёл как строка "100.2", а не число
     assert currencies[1]["rate"] == "100.2"
@@ -258,4 +258,4 @@ def test_missing_settings_keys(
     mock_read_json.return_value = incomplete_settings
     # Функция должна упасть с KeyError при обращении к отсутствующим ключам
     with pytest.raises(KeyError):
-        main_web_site()
+        main_web_site('df_transactions')

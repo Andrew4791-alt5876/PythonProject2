@@ -420,7 +420,7 @@ class TestConvertAmountOfTransactions:
         with caplog.at_level(logging.WARNING):
             result = convert_amount_of_transactions(100.0, "USD")
         assert result == 0
-        assert "Неверный формат ответа от API по курсу валюты" in caplog.text
+        assert "Ошибка обработки данных:" in caplog.text
 
     @patch("src.utils.requests.request")
     @patch("src.utils.os.getenv")

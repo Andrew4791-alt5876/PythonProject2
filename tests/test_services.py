@@ -293,26 +293,18 @@ def test_sort_operations_by_user_month_year_month_year_order(mock_year: Any, moc
 @patch("src.services.sort_operations_by_user_month_year")
 @patch("src.services.read_excel_file")
 def test_sort_data_by_categories_success(mock_read_excel: Any, mock_sort: Any) -> None:
-    """Проверка успешного формирования словаря с удалением исключённых категорий и сортировкой."""
-    # Создаём тестовый DataFrame после фильтрации (как если бы его вернула sort_operations_by_user_month_year)
     data = {
         "Категория": ["Супермаркеты", "Аптеки", "Переводы", "Кафе", "Бонусы", "Супермаркеты"],
         "Сумма платежа": [100.50, 250.00, -50.00, 300.75, 200.00, 50.00],
     }
     filtered_df = pd.DataFrame(data)
-    # Настройка моков
-    mock_read_excel.return_value = pd.DataFrame()  # не важно, что возвращает, главное чтобы был вызван
+    mock_read_excel.return_value = pd.DataFrame()  # не важно
     mock_sort.return_value = filtered_df
-    # Вызов тестируемой функции
-    result = sort_data_by_categories()
-    # Ожидаемый результат после группировки и удаления исключённых категорий:
-    # Группировка: Супермаркеты = 150.5 (100.5+50), Аптеки = 250, Кафе = 300.75
-    # Исключаем: Переводы (-50), Бонусы (200)
-    # Сортировка по возрастанию: Супермаркеты (150.5), Аптеки (250), Кафе (300.75)
+    result = sort_data_by_categories(filtered_df)
     expected = {"Супермаркеты": 150.5, "Аптеки": 250.0, "Кафе": 300.75}
     assert result == expected
-    mock_read_excel.assert_called_once_with("../data/operations.xlsx")
-    mock_sort.assert_called_once()
+    mock_sort.assert_called_once_with(filtered_df)
+    mock_read_excel.assert_not_called()
 
 
 @patch("src.services.sort_operations_by_user_month_year")
@@ -323,7 +315,7 @@ def test_sort_data_by_categories_no_excluded_categories(mock_read_excel: Any, mo
     filtered_df = pd.DataFrame(data)
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = filtered_df
-    result = sort_data_by_categories()
+    result = sort_data_by_categories('df_excel')
     # После сортировки по возрастанию: Телефон (150.25), Интернет (300.5), Такси (500)
     expected = {"Телефон": 150.25, "Интернет": 300.5, "Такси": 500.0}
     assert result == expected
@@ -336,7 +328,7 @@ def test_sort_data_by_categories_empty_after_filter(mock_read_excel: Any, mock_s
     empty_df = pd.DataFrame(columns=["Категория", "Сумма платежа"])
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = empty_df
-    result = sort_data_by_categories()
+    result = sort_data_by_categories('df_excel')
     assert result == {}
 
 
@@ -351,7 +343,7 @@ def test_sort_data_by_categories_all_excluded(mock_read_excel: Any, mock_sort: A
     filtered_df = pd.DataFrame(data)
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = filtered_df
-    result = sort_data_by_categories()
+    result = sort_data_by_categories('df_excel')
     assert result == {}
 
 
@@ -363,6 +355,6 @@ def test_sort_data_by_categories_rounding(mock_read_excel: Any, mock_sort: Any) 
     filtered_df = pd.DataFrame(data)
     mock_read_excel.return_value = pd.DataFrame()
     mock_sort.return_value = filtered_df
-    result = sort_data_by_categories()
+    result = sort_data_by_categories('df_excel')
     expected = {"Продукты": 100.56, "Одежда": 201.0}
     assert result == expected

@@ -27,7 +27,7 @@ def test_log_reports_default_filename(
         return mock_df
 
     result = test_func()
-    expected_filename = "../log_report/report_test_func_20230515.json"
+    expected_filename = "log_report/report_test_func_20230515.json"
     mock_file_open.assert_called_once_with(expected_filename, "w", encoding="utf-8")
     mock_json_dump.assert_called_once_with([{"col": "val"}], mock_file_open(), indent=2, ensure_ascii=False)
     mock_df.to_json.assert_called_once_with(orient="records", date_format="iso", force_ascii=False)
@@ -99,7 +99,7 @@ def test_log_reports_creates_directory(mock_file_open: Any, mock_datetime: Any) 
         return mock_df
 
     test_func()
-    expected = "../log_report/report_test_func_20240101.json"
+    expected = "log_report/report_test_func_20240101.json"
     mock_file_open.assert_called_once_with(expected, "w", encoding="utf-8")
 
 

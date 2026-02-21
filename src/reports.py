@@ -33,7 +33,7 @@ def log_reports(filename: Any | None = None) -> Any:
                 # Генерируем имя файла по умолчанию
                 timestamp = datetime.now().strftime("%Y%m%d")
                 func_name = func.__name__
-                file_path = f"log_report/_{func_name}_{timestamp}.json"
+                file_path = f"log_report/report_{func_name}_{timestamp}.json"
                 logger.info(f"Путь для сохранения отчета {filename} сгенерирован автоматически")
             try:
                 with open(file_path, "w", encoding="utf-8") as f:
