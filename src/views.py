@@ -92,19 +92,19 @@ def main_web_site(df_transactions: Any) -> Any:
             logger.info(f"Курс валюты {currrency} доступен")
 
     # Формирование JSON-ответа в части "stock_prices".
-    dict_course_stocks = price_of_stocks(user_setting_file[0]["user_stocks"])
+    # dict_course_stocks = price_of_stocks(user_setting_file[0]["user_stocks"])
     list_course_stocks = []
-    for i in user_setting_file[0]["user_stocks"]:
-        dict_stocks = {}
-        dict_stocks["stock"] = i
-        if dict_course_stocks != {}:
-            dict_stocks["price"] = round(float(dict_course_stocks[i]["price"]), 2)
-            list_course_stocks.append(dict_stocks)
-            logger.info("Сформирован JSON-ответ в части stock_prices")
-        else:
-            dict_stocks["price"] = 0
-            list_course_stocks.append(dict_stocks)
-            logger.warning(f"Стоимость акции {i} не доступна")
+    # for i in user_setting_file[0]["user_stocks"]:
+    #     dict_stocks = {}
+    #     dict_stocks["stock"] = i
+    #     if dict_course_stocks != {}:
+    #         dict_stocks["price"] = round(float(dict_course_stocks[i]["price"]), 2)
+    #         list_course_stocks.append(dict_stocks)
+    #         logger.info("Сформирован JSON-ответ в части stock_prices")
+    #     else:
+    #         dict_stocks["price"] = 0
+    #         list_course_stocks.append(dict_stocks)
+    #         logger.warning(f"Стоимость акции {i} не доступна")
 
     # Вывод JSON-ответа для web-сайта.
     message_to_frontend = {
