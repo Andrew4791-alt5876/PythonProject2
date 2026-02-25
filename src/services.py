@@ -65,7 +65,7 @@ def sort_operations_by_user_month_year(data_frame: Any = []) -> Any:
 
 
 def sort_data_by_categories(df_excel: Any) -> dict:
-    '''Функция, которая преобразовывает базу данных в словарь {категория: сумма платежа}.'''
+    """Функция, которая преобразовывает базу данных в словарь {категория: сумма платежа}."""
     try:
         df_choose_user = sort_operations_by_user_month_year(df_excel)
         df_grouped = df_choose_user.groupby("Категория")["Сумма платежа"].sum().to_dict()
