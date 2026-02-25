@@ -3,6 +3,7 @@ from unittest.mock import call, patch
 
 import pandas as pd
 import pytest
+from _pytest.logging import LogCaptureFixture
 
 from src.services import input_user_month, input_user_year, sort_data_by_categories, sort_operations_by_user_month_year
 
@@ -290,71 +291,50 @@ def test_sort_operations_by_user_month_year_month_year_order(mock_year: Any, moc
 
 
 # Тесты для sort_data_by_categories
-@patch("src.services.sort_operations_by_user_month_year")
-@patch("src.services.read_excel_file")
-def test_sort_data_by_categories_success(mock_read_excel: Any, mock_sort: Any) -> None:
-    data = {
-        "Категория": ["Супермаркеты", "Аптеки", "Переводы", "Кафе", "Бонусы", "Супермаркеты"],
-        "Сумма платежа": [100.50, 250.00, -50.00, 300.75, 200.00, 50.00],
-    }
-    filtered_df = pd.DataFrame(data)
-    mock_read_excel.return_value = pd.DataFrame()  # не важно
-    mock_sort.return_value = filtered_df
-    result = sort_data_by_categories(filtered_df)
-    expected = {"Супермаркеты": 150.5, "Аптеки": 250.0, "Кафе": 300.75}
-    assert result == expected
-    mock_sort.assert_called_once_with(filtered_df)
-    mock_read_excel.assert_not_called()
+def test_sort_data_by_categories_success(mocker: Any, sample_df: Any, mock_sort_operations: Any) -> None:
+    """Успешная обработка данных."""
+    result = sort_data_by_categories(sample_df)
 
-
-@patch("src.services.sort_operations_by_user_month_year")
-@patch("src.services.read_excel_file")
-def test_sort_data_by_categories_no_excluded_categories(mock_read_excel: Any, mock_sort: Any) -> None:
-    """Проверка, что если нет категорий из списка исключения, возвращаются все."""
-    data = {"Категория": ["Такси", "Интернет", "Телефон"], "Сумма платежа": [500.00, 300.50, 150.25]}
-    filtered_df = pd.DataFrame(data)
-    mock_read_excel.return_value = pd.DataFrame()
-    mock_sort.return_value = filtered_df
-    result = sort_data_by_categories('df_excel')
-    # После сортировки по возрастанию: Телефон (150.25), Интернет (300.5), Такси (500)
-    expected = {"Телефон": 150.25, "Интернет": 300.5, "Такси": 500.0}
+    expected = {"Транспорт": 200, "Еда": 650}
     assert result == expected
 
 
-@patch("src.services.sort_operations_by_user_month_year")
-@patch("src.services.read_excel_file")
-def test_sort_data_by_categories_empty_after_filter(mock_read_excel: Any, mock_sort: Any) -> None:
-    """Если после фильтрации по месяцу/году DataFrame пуст, возвращается пустой словарь."""
-    empty_df = pd.DataFrame(columns=["Категория", "Сумма платежа"])
-    mock_read_excel.return_value = pd.DataFrame()
-    mock_sort.return_value = empty_df
-    result = sort_data_by_categories('df_excel')
+def test_sort_data_by_categories_removes_categories(
+    mocker: Any, sample_df: Any, mock_sort_operations: Any
+) -> None:
+    """Проверка, что категории из list_of_categories удаляются."""
+    result = sort_data_by_categories(sample_df)
+    forbidden = ["Бонусы", "Переводы", "Пополнения", "Наличные", "Зарплата"]
+    for cat in forbidden:
+        assert cat not in result
+
+
+def test_sort_data_by_categories_rounding(mocker: Any, mock_sort_operations: Any) -> None:
+    """Проверка округления до двух знаков."""
+    # Создаём DataFrame с нецелыми суммами
+    data = {"Категория": ["Еда", "Транспорт"], "Сумма платежа": [123.456, 78.9]}
+    df = pd.DataFrame(data)
+    result = sort_data_by_categories(df)
+    expected = {"Транспорт": 78.9, "Еда": 123.46}  # округление
+    assert result == expected
+
+
+def test_sort_data_by_categories_sorting(mocker: Any, mock_sort_operations: Any) -> None:
+    """Проверка сортировки по возрастанию (reverse=False)."""
+    data = {"Категория": ["A", "B", "C"], "Сумма платежа": [300, 100, 200]}
+    df = pd.DataFrame(data)
+    result = sort_data_by_categories(df)
+    # Сортировка по сумме (по возрастанию): 100, 200, 300
+    expected = {"B": 100, "C": 200, "A": 300}
+    assert list(result.items()) == list(expected.items())
+
+
+def test_sort_data_by_categories_attribute_error(mocker: Any, caplog: LogCaptureFixture) -> None:
+    """Обработка исключения AttributeError (например, если df_excel не является DataFrame)."""
+    # Мокаем внешнюю функцию так, чтобы она выбросила AttributeError
+    mocker.patch("src.services.sort_operations_by_user_month_year", side_effect=AttributeError("Invalid DataFrame"))
+    result = sort_data_by_categories(None)
+    # Проверяем, что функция вернула пустой словарь
     assert result == {}
-
-
-@patch("src.services.sort_operations_by_user_month_year")
-@patch("src.services.read_excel_file")
-def test_sort_data_by_categories_all_excluded(mock_read_excel: Any, mock_sort: Any) -> None:
-    """Если все категории попадают в список исключения, возвращается пустой словарь."""
-    data = {
-        "Категория": ["Бонусы", "Переводы", "Пополнения", "Наличные", "Зарплата"],
-        "Сумма платежа": [100, 200, 300, 400, 500],
-    }
-    filtered_df = pd.DataFrame(data)
-    mock_read_excel.return_value = pd.DataFrame()
-    mock_sort.return_value = filtered_df
-    result = sort_data_by_categories('df_excel')
-    assert result == {}
-
-
-@patch("src.services.sort_operations_by_user_month_year")
-@patch("src.services.read_excel_file")
-def test_sort_data_by_categories_rounding(mock_read_excel: Any, mock_sort: Any) -> None:
-    """Проверка округления сумм до двух знаков."""
-    data = {"Категория": ["Продукты", "Одежда"], "Сумма платежа": [100.555, 200.999]}
-    filtered_df = pd.DataFrame(data)
-    mock_read_excel.return_value = pd.DataFrame()
-    mock_sort.return_value = filtered_df
-    result = sort_data_by_categories('df_excel')
-    expected = {"Продукты": 100.56, "Одежда": 201.0}
-    assert result == expected
+    # Проверяем, что было залогировано сообщение об ошибке
+    assert "Ошибка загрузки DataFrame" in caplog.text

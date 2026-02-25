@@ -6,7 +6,6 @@ from typing import Any, Callable, Optional
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
-
 logger = logging.getLogger("reports")
 logger.setLevel(logging.DEBUG)
 file_handler = logging.FileHandler(

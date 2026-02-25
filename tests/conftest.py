@@ -41,3 +41,20 @@ def sample_excel_file() -> Generator[str, Any, None]:
     yield file_path
     # Удаляем файл после завершения теста
     os.unlink(file_path)
+
+
+# Фикстура для создания тестового DataFrame
+@pytest.fixture
+def sample_df() -> DataFrame:
+    data = {
+        "Категория": ["Еда", "Транспорт", "Еда", "Бонусы", "Переводы"],
+        "Сумма платежа": [500, 200, 150, 1000, 500],
+    }
+    return pd.DataFrame(data)
+
+
+# Фикстура для мока внешней функции sort_operations_by_user_month_year
+@pytest.fixture
+def mock_sort_operations(mocker: Any) -> Any:
+    # Мокаем функцию, чтобы она возвращала тот же DataFrame, который передали
+    return mocker.patch("src.services.sort_operations_by_user_month_year", side_effect=lambda df: df)

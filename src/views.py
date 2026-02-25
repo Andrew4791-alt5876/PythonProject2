@@ -3,8 +3,8 @@ from typing import Any
 
 import pandas as pd
 
-from src.utils import (convert_amount_of_transactions, hello_by_current_time, price_of_stocks, read_excel_file,
-                       read_json_file, sort_operations_by_date)
+from src.utils import (convert_amount_of_transactions, hello_by_current_time, price_of_stocks, read_json_file,
+                       sort_operations_by_date)
 
 logger = logging.getLogger("views")
 logger.setLevel(logging.DEBUG)
@@ -16,7 +16,7 @@ file_handler.setFormatter(file_formater)
 logger.addHandler(file_handler)
 
 
-def main_web_site(df_transactions) -> Any:
+def main_web_site(df_transactions: Any) -> Any:
     """Функция генерации JSON-ответа для страницы «Главная»."""
 
     # Формирование JSON-ответа в части "greeting".
