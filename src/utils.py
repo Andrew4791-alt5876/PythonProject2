@@ -11,14 +11,23 @@ from dotenv import load_dotenv
 from pandas import DataFrame
 from twelvedata import TDClient
 
+
+def configure_logger(logger: Any) -> None:
+    """Конфигурация логгера для проекта"""
+    module_short = logger.name.split(".")[-1]
+    log_file = os.path.join("logs", f"{module_short}.log")
+    # Чтобы не дублировать обработчики при повторных вызовах, очищаем старые
+    if logger.hasHandlers():
+        logger.handlers.clear()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
+    handler = logging.FileHandler(log_file, "w", encoding="utf-8")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+
+
 logger = logging.getLogger("utils")
-logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(
-    "C:/Users/User/PycharmProjects/PythonProject2/logs/utils.log", "w", encoding="utf-8"
-)
-file_formater = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
-file_handler.setFormatter(file_formater)
-logger.addHandler(file_handler)
+configure_logger(logger)
 
 
 def read_excel_file(file_path_excel: Any = "") -> list | DataFrame | list[str]:
@@ -77,6 +86,56 @@ def sort_operations_by_date(data_frame: Any) -> Any:
         return []
 
 
+def create_json_info_cards(sorted_transactions: DataFrame, list_user_card: list) -> Any:
+    """Функция формирования ответа по разделу cards для страницы 'Главная'"""
+    list_of_cards = []
+    for card in list_user_card:
+        # Обработка строки (нормальный номер карты)
+        if isinstance(card, str):
+            last_digits = card[-4:] if len(card) >= 4 else card
+            mask = sorted_transactions["Номер карты"] == card
+        # Обработка отсутствующего значения (NaN, None)
+        elif pd.isna(card):
+            last_digits = "NaN"
+            mask = sorted_transactions["Номер карты"].isna()
+        # Обработка чисел (int, float, но не NaN)
+        else:
+            # Числовой номер карты
+            str_card = str(card)  # строковое представление для сравнения
+            clean_card = str_card.replace(".", "").replace(" ", "")  # очистка для last_digits
+            last_digits = clean_card[-4:] if len(clean_card) >= 4 else clean_card
+            mask = sorted_transactions["Номер карты"] == str_card  # сравнение со строкой
+        # Расчёт суммы и кэшбэка
+        sort_by_card = sorted_transactions[mask]
+        sum_of_prices = sort_by_card["Сумма платежа"].sum()
+        rounded_sum = float(round(sum_of_prices, 2))
+        if rounded_sum < 0:
+            cashback = float(round(abs(rounded_sum / 100), 2))
+        else:
+            cashback = 0
+        dict_sum_prices = {"last_digits": last_digits, "total_spent": rounded_sum, "cashback": cashback}
+        list_of_cards.append(dict_sum_prices)
+        return list_of_cards
+
+
+def create_json_info_top(sorted_transactions_top: DataFrame) -> Any:
+    """Функция формирования ответа по разделу top_transactions для страницы 'Главная'"""
+    df_sorted_top_transactions = sorted_transactions_top.sort_values(
+        by="Сумма платежа", key=lambda col: col.abs(), ascending=False
+    )
+    list_info_top = df_sorted_top_transactions.head(5).to_dict("records")
+    list_top_transactions = []
+    for transactions in list_info_top:
+        dict_top_transaction = {}
+        date_str = (str(transactions["Дата операции"]))[:10]
+        dict_top_transaction["date"] = date_str
+        dict_top_transaction["amount"] = transactions["Сумма платежа"]
+        dict_top_transaction["category"] = transactions["Категория"]
+        dict_top_transaction["description"] = transactions["Описание"]
+        list_top_transactions.append(dict_top_transaction)
+        return list_top_transactions
+
+
 def convert_amount_of_transactions(amount: float, currency: str) -> Union[float, str]:
     """Функция конвертирования валюты из долларов или евро в рубли."""
     if currency not in ["USD", "EUR"]:
@@ -97,7 +156,6 @@ def convert_amount_of_transactions(amount: float, currency: str) -> Union[float,
         response = requests.request("GET", url, headers=headers, params=params, timeout=10)
         response.raise_for_status()
         result = json.loads(response.text)
-        print(result)
         if isinstance(result["result"], (int, float)):
             logger.info(f"Курс валюты {currency} получен успешно")
             return round(float(result["result"]), 2)
@@ -112,15 +170,31 @@ def convert_amount_of_transactions(amount: float, currency: str) -> Union[float,
         return 0
 
 
+def create_info_user_currency(user_currency: list) -> list:
+    """Функция формирования ответа по разделу currency_rates для страницы 'Главная'"""
+    list_of_coursies = []
+    for currrency in user_currency[0]["user_currencies"]:
+        currrency_dict = {}
+        currrency_dict["currency"] = currrency
+        curse_to_rub = convert_amount_of_transactions(1, currrency)
+        if curse_to_rub == 0:
+            logger.warning(f"Курс валюты {currrency} не доступен")
+        else:
+            currrency_dict["rate"] = curse_to_rub
+            list_of_coursies.append(currrency_dict)
+            logger.info(f"Курс валюты {currrency} доступен")
+    return list_of_coursies
+
+
 def price_of_stocks(stocks: Any) -> Any:
     """Функция для получения стоимости акций."""
     load_dotenv()
-    API_KEY: str | None = os.getenv("API_KEY_STOCKS")
-    if not API_KEY:
+    API_KEY_STOCKS: str | None = os.getenv("API_KEY_STOCKS")
+    if not API_KEY_STOCKS:
         logger.warning("API ключ не найден по стоимости акций")
         return {}
     try:
-        td = TDClient(apikey=API_KEY)
+        td = TDClient(apikey=API_KEY_STOCKS)
         price = td.price(symbol=stocks).as_json()
         if isinstance(price, dict):
             logger.info(f"Стоимость акций {stocks} получена успешно")
@@ -134,6 +208,24 @@ def price_of_stocks(stocks: Any) -> Any:
     except KeyError as err:
         logger.error(f"Ошибка обработки данных: {str(err)}")
         return {}
+
+
+def create_info_stocks(user_stocks_file: list) -> list:
+    """Функция формирования ответа по разделу currency_rates для страницы 'Главная'"""
+    dict_course_stocks = price_of_stocks(user_stocks_file[0]["user_stocks"])
+    list_course_stocks = []
+    for i in user_stocks_file[0]["user_stocks"]:
+        dict_stocks = {}
+        dict_stocks["stock"] = i
+        if dict_course_stocks != {}:
+            dict_stocks["price"] = round(float(dict_course_stocks[i]["price"]), 2)
+            list_course_stocks.append(dict_stocks)
+            logger.info("Сформирован JSON-ответ в части stock_prices")
+        else:
+            dict_stocks["price"] = 0
+            list_course_stocks.append(dict_stocks)
+            logger.warning(f"Стоимость акции {i} не доступна")
+    return list_course_stocks
 
 
 def read_json_file(path: Any = "") -> list[dict]:

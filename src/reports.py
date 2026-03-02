@@ -6,14 +6,10 @@ from typing import Any, Callable, Optional
 import pandas as pd
 from dateutil.relativedelta import relativedelta
 
+from src.utils import configure_logger
+
 logger = logging.getLogger("reports")
-logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(
-    "C:/Users/User/PycharmProjects/PythonProject2/logs/reports.log", "w", encoding="utf-8"
-)
-file_formater = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
-file_handler.setFormatter(file_formater)
-logger.addHandler(file_handler)
+configure_logger(logger)
 
 
 def log_reports(filename: Any | None = None) -> Any:

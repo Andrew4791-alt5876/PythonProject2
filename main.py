@@ -13,7 +13,7 @@ if __name__ == '__main__':
     print(sort_data_by_categories(transactions))
     print('#' * 150)
     print('Информация об отчете(Траты по категории):')
-    print(spending_by_category(transactions,'ЖКХ', '2019-02-19'))
+    print(spending_by_category(transactions, 'ЖКХ', '2019-02-19'))
 
 
 # ['Категория']
