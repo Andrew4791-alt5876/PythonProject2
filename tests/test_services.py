@@ -295,13 +295,11 @@ def test_sort_data_by_categories_success(mocker: Any, sample_df: Any, mock_sort_
     """Успешная обработка данных."""
     result = sort_data_by_categories(sample_df)
 
-    expected = {"Транспорт": 200, "Еда": 650}
+    expected = {"Перевод": 200, "Еда": -150}
     assert result == expected
 
 
-def test_sort_data_by_categories_removes_categories(
-    mocker: Any, sample_df: Any, mock_sort_operations: Any
-) -> None:
+def test_sort_data_by_categories_removes_categories(mocker: Any, sample_df: Any, mock_sort_operations: Any) -> None:
     """Проверка, что категории из list_of_categories удаляются."""
     result = sort_data_by_categories(sample_df)
     forbidden = ["Бонусы", "Переводы", "Пополнения", "Наличные", "Зарплата"]

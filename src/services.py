@@ -3,14 +3,10 @@ from typing import Any
 
 import pandas as pd
 
+from src.utils import configure_logger
+
 logger = logging.getLogger("services")
-logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(
-    "C:/Users/User/PycharmProjects/PythonProject2/logs/services.log", "w", encoding="utf-8"
-)
-file_formater = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s: %(message)s")
-file_handler.setFormatter(file_formater)
-logger.addHandler(file_handler)
+configure_logger(logger)
 
 
 def input_user_month() -> int | None:
